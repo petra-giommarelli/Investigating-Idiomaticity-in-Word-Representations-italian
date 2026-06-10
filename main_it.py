@@ -13,7 +13,7 @@ from for_probes_it import sim_scores, has_nc
 
 MAIN_CSV   = "MWEs_completo_tagged.csv"
 
-PSYN_XLSX  = "frasi_PSyn_corretto.xlsx"
+PSYN_XLSX  = "frasi_PSyn.xlsx"
 
 NAT_PRAND_PATHS = [
     "frasi_naturali_prand_1.xlsx",
