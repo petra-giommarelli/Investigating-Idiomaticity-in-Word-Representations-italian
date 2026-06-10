@@ -24,21 +24,26 @@ def load_main_csv(path):
 
 
 def load_psyn_xlsx(path):
-    return pd.read_excel(path).set_index("ESPRESSIONE")
+    return pd.read_excel(path).set_index("NC")
 
 
-def load_prand_xlsx(nat_paths, neut_paths):
-    
-    nat_dfs  = [pd.read_excel(p).set_index("ESPRESSIONE")  for p in nat_paths]
-    neut_dfs = [pd.read_excel(p).set_index("Espressione")  for p in neut_paths]
+def load_prand_xlsx(prand_path):
+
+    sheets = pd.read_excel(prand_path, sheet_name=None)
+    nat_dfs, neut_dfs = [], []
+    for name in sorted(sheets.keys()):
+        df = sheets[name].set_index("NC")
+        nat_dfs.append(df[["PRand", "sentence_nat_1_PRand",
+                           "sentence_nat_2_PRand", "sentence_nat_3_PRand"]])
+        neut_dfs.append(df[["PRand", "sentence_neut_PRand"]])
     return nat_dfs, neut_dfs
 
 def replace_nc(sentence, nc, replacement):
     return sentence.replace(nc, replacement, 1)
 
 
-def extract_content_words(espressione):
-    return [t for t in espressione.strip().split() if t.lower() not in STOP_WORDS]
+def extract_content_words(nc):
+    return [t for t in nc.strip().split() if t.lower() not in STOP_WORDS]
 
 
 def parse_bool_tags(tag_str):
