@@ -11,24 +11,11 @@ import fasttext
 from utils_it import load_main_csv, load_psyn_xlsx, load_prand_xlsx
 from for_probes_it import sim_scores, has_nc
 
-MAIN_CSV   = "MWEs_completo_tagged.csv"
+MAIN_CSV   = "NC_original.csv"
 
-PSYN_XLSX  = "frasi_PSyn.xlsx"
+PSYN_XLSX  = "NC_PSyn.xlsx"
 
-NAT_PRAND_PATHS = [
-    "frasi_naturali_prand_1.xlsx",
-    "frasi_naturali_prand_2.xlsx",
-    "frasi_naturali_prand_3.xlsx",
-    "frasi_naturali_prand_4.xlsx",
-    "frasi_naturali_prand_5.xlsx",
-]
-NEUT_PRAND_PATHS = [
-    "frasi_neutre_prand_1.xlsx",
-    "frasi_neutre_prand_2.xlsx",
-    "frasi_neutre_prand_3.xlsx",
-    "frasi_neutre_prand_4.xlsx",
-    "frasi_neutre_prand_5.xlsx",
-]
+PRAND_XLSX = "NC_PRand.xlsx"
 
 FASTTEXT_MODEL_PATH = "cc.it.300.bin"
 
@@ -71,8 +58,8 @@ else:
     device = "cpu"
 print(f"Device: {device}")
 
-def write_xlsx(risultati, output_path, sheet_title):
-    df_out = pd.DataFrame(risultati)
+def write_xlsx(results, output_path, sheet_title):
+    df_out = pd.DataFrame(results)
     wb = Workbook()
     ws = wb.active
     ws.title = sheet_title[:31]  
@@ -90,7 +77,7 @@ def write_xlsx(risultati, output_path, sheet_title):
         cell.fill      = header_fill
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    for r, record in enumerate(risultati, start=2):
+    for r, record in enumerate(results, start=2):
         bg = alt_fill if r % 2 == 0 else white_fill
         for c, col_name in enumerate(cols, start=1):
             cell = ws.cell(row=r, column=c, value=record.get(col_name, ""))
@@ -148,7 +135,7 @@ def main():
     print("Loading data...")
     df_main  = load_main_csv(MAIN_CSV)
     df_psyn  = load_psyn_xlsx(PSYN_XLSX)
-    nat_dfs, neut_dfs = load_prand_xlsx(NAT_PRAND_PATHS, NEUT_PRAND_PATHS)
+    nat_dfs, neut_dfs = load_prand_xlsx(PRAND_XLSX)
     print(f"  {len(df_main)} MWEs loaded from {MAIN_CSV}")
 
     for model_name, config in MODEL_REGISTRY.items():
@@ -159,7 +146,7 @@ def main():
 
             print(f"\n[{model_name}] probe={probe}")
 
-            risultati = sim_scores(
+            results = sim_scores(
                 probe      = probe,
                 df_main    = df_main,
                 model_name = model_name,
@@ -173,7 +160,7 @@ def main():
 
             output_path  = os.path.join(OUTPUT_DIR, f"Sim_{probe}_{model_name}.xlsx")
             sheet_title  = f"Sim({probe}) {model_name}"
-            write_xlsx(risultati, output_path, sheet_title)
+            write_xlsx(results, output_path, sheet_title)
 
         del model
         if device in ("cuda", "mps"):
